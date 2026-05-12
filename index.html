@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary SEO -->
+  <title>Bouteille — Bar à vin | Stockel, Brussels</title>
+  <meta name="description" content="Bouteille is a neighbourhood wine bar in Stockel, Brussels. A curated selection of wines from across Europe, seasonal food, and regular tastings. Opening soon.">
+  <meta name="keywords" content="wine bar, bar à vin, Stockel, Brussels, Bruxelles, Woluwe-Saint-Pierre, natural wine, wine tasting, dégustation, wijnbar, Bouteille">
+  <meta name="author" content="Bouteille">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://baravinbouteille.be/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://baravinbouteille.be/">
+  <meta property="og:title" content="Bouteille — Bar à vin | Stockel, Brussels">
+  <meta property="og:description" content="A neighbourhood wine bar in Stockel, Brussels. Curated wines, seasonal food, and regular tastings. Opening soon.">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:locale:alternate" content="fr_BE">
+  <meta property="og:locale:alternate" content="nl_BE">
+  <meta property="og:site_name" content="Bouteille">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Bouteille — Bar à vin | Stockel, Brussels">
+  <meta name="twitter:description" content="A neighbourhood wine bar in Stockel, Brussels. Opening soon.">
+
+  <!-- Geo / Local SEO -->
+  <meta name="geo.region" content="BE-BRU">
+  <meta name="geo.placename" content="Woluwe-Saint-Pierre">
+  <meta name="geo.position" content="50.8340;4.4260">
+  <meta name="ICBM" content="50.8340, 4.4260">
+
+  <!-- Favicon placeholder -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍷</text></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data / JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BarOrPub",
+    "name": "Bouteille",
+    "description": "A neighbourhood wine bar in Stockel, Brussels offering a curated selection of wines from across Europe, seasonal food, and regular tastings.",
+    "url": "https://baravinbouteille.be",
+    "email": "hello@baravinbouteille.be",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Place Dumon",
+      "addressLocality": "Woluwe-Saint-Pierre",
+      "postalCode": "1150",
+      "addressRegion": "Brussels",
+      "addressCountry": "BE"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 50.8340,
+      "longitude": 4.4260
+    },
+    "servesCuisine": "Wine bar",
+    "priceRange": "€€",
+    "sameAs": [
+      "https://www.instagram.com/bouteille.bar"
+    ],
+    "openingHoursSpecification": [],
+    "hasMenu": false,
+    "acceptsReservations": true
+  }
+  </script>
+</head>
+<body>
+
+  <canvas id="grain" aria-hidden="true"></canvas>
+  <div class="curtain" aria-hidden="true"></div>
+
+  <nav class="lang-nav reveal" data-delay="6" aria-label="Language">
+    <button class="lang-btn active" data-lang="en" aria-current="true">EN</button>
+    <span class="lang-sep" aria-hidden="true"></span>
+    <button class="lang-btn" data-lang="fr">FR</button>
+    <span class="lang-sep" aria-hidden="true"></span>
+    <button class="lang-btn" data-lang="nl">NL</button>
+  </nav>
+
+  <main>
+    <div class="composition">
+      <div class="logo-col reveal" data-delay="0">
+        <img src="logo.png" alt="Bouteille — bar à vin, Stockel, Brussels" class="logo" width="220" height="220">
+      </div>
+
+      <div class="content-col">
+        <h1 class="tagline reveal" data-delay="1">
+          <span data-i18n="tagline">A neighbourhood wine bar in Stockel, Brussels.</span>
+        </h1>
+
+        <div class="rule reveal" data-delay="2" aria-hidden="true"></div>
+
+        <p class="status reveal" data-delay="3">
+          <span data-i18n="status">Opening soon</span>
+        </p>
+
+        <div class="details reveal" data-delay="4">
+          <address class="detail-col" itemscope itemtype="https://schema.org/PostalAddress">
+            <span class="detail-label" data-i18n="findUs">Find us</span>
+            <span class="detail-value">
+              <span itemprop="streetAddress">Place Dumon</span><br>
+              <span itemprop="postalCode">1150</span> <span itemprop="addressLocality">Woluwe-Saint-Pierre</span><br>
+              <span itemprop="addressRegion">Brussels</span>
+            </span>
+          </address>
+          <div class="detail-col">
+            <span class="detail-label" data-i18n="touch">Get in touch</span>
+            <a href="mailto:hello@baravinbouteille.be" class="detail-value link">hello@baravinbouteille.be</a>
+          </div>
+        </div>
+
+        <a href="https://www.instagram.com/bouteille.bar" class="social reveal" data-delay="5" target="_blank" rel="noopener">
+          <span data-i18n="follow">Follow along</span><span class="social-dash">—</span>@bouteille.bar
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
