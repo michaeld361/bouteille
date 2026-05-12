@@ -371,7 +371,7 @@ main {
   .composition {
     flex-direction: column;
     align-items: center;
-    gap: 2.5rem;
+    gap: 1.5rem;
   }
 
   .content-col {
@@ -381,16 +381,23 @@ main {
 
   .tagline {
     text-align: center;
-    max-width: 340px;
+    max-width: 300px;
+    margin-bottom: 1.5rem;
+    font-size: clamp(1rem, 4vw, 1.3rem);
   }
 
   .rule {
     transform-origin: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .status {
+    margin-bottom: 1.8rem;
   }
 
   .details {
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
     align-items: center;
   }
 
@@ -399,10 +406,11 @@ main {
   }
 
   .logo {
-    width: clamp(120px, 30vw, 180px);
+    width: clamp(110px, 28vw, 160px);
   }
 
   .social {
+    margin-top: 1.5rem;
     flex-direction: column;
     gap: 4px;
   }
@@ -412,17 +420,14 @@ main {
   }
 
   .lang-nav {
-    padding: 20px 24px;
-  }
-
-  body, html {
-    overflow-y: auto;
+    padding: 16px 20px;
   }
 
   main {
-    min-height: 100vh;
-    height: auto;
-    padding: 5rem 1.5rem 4rem;
+    height: 100vh;
+    padding: 3.5rem 1.5rem 2rem;
+    justify-content: flex-start;
+    padding-top: 15vh;
   }
 }
 
