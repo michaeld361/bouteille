@@ -15,7 +15,7 @@ const i18n = {
   },
   fr: {
     tagline:  "Bar à vin de quartier à Stockel, Bruxelles.",
-    status:   "Ouverture prochaine",
+    status:   "Ouverture prochainement",
     findUs:   "Nous trouver",
     touch:    "Contact",
     follow:   "Suivez-nous",
