@@ -406,7 +406,7 @@ main {
   }
 
   .logo {
-    width: clamp(110px, 28vw, 160px);
+    width: clamp(150px, 38vw, 200px);
   }
 
   .social {
