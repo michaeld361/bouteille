@@ -307,6 +307,15 @@ ul, ol { list-style: none; }
   transform: scale(1.4);
   transform-origin: center center;
   will-change: transform, filter, brightness;
+  animation: hero-bg-fallback 2s ease forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes hero-bg-fallback {
+  to {
+    transform: scale(1);
+    filter: brightness(0.8) blur(0px);
+  }
 }
 
 .hero__gradient {
@@ -343,6 +352,15 @@ ul, ol { list-style: none; }
   will-change: transform, clip-path;
   transition: color 0.4s ease;
   user-select: none;
+  animation: hero-title-fallback 1s ease forwards;
+  animation-delay: 1.5s;
+}
+
+@keyframes hero-title-fallback {
+  to {
+    transform: rotateX(0) translateY(0%);
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
 }
 
 .hero__title:hover {
