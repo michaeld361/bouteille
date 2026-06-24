@@ -1497,6 +1497,221 @@ a.detail-block__value:hover {
   background: rgba(26, 26, 24, 0.06);
 }
 
+/* ── Time Slot Grid (Odoo booking) ── */
+.time-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.time-slots__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.time-slots__loading,
+.time-slots__closed {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--cork);
+  padding: 16px 0;
+}
+
+.time-slot {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding: 14px 8px;
+  border: 1px solid rgba(26, 26, 24, 0.12);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  text-align: center;
+  position: relative;
+  color: var(--ink);
+}
+
+.time-slot:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: rgba(26, 26, 24, 0.04);
+}
+
+.time-slot--selected {
+  border-color: var(--ink) !important;
+  background: rgba(26, 26, 24, 0.08) !important;
+  font-weight: 500;
+}
+
+.time-slot--unavailable {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.time-slot__time {
+  display: block;
+}
+
+.time-slot__tag {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+  opacity: 0.7;
+  text-decoration: none;
+}
+
+/* ── Guest Details (slide in) ── */
+.guest-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: slideIn 0.4s ease;
+  border-top: 1px solid rgba(26, 26, 24, 0.1);
+  padding-top: 32px;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Booking Confirmed ── */
+.booking-confirmed {
+  text-align: center;
+  padding: 40px 0;
+  animation: slideIn 0.5s ease;
+}
+
+.booking-confirmed__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 24px;
+  color: var(--ink);
+}
+
+.booking-confirmed__title {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.booking-confirmed__message {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--cork);
+  margin: 0 0 32px;
+}
+
+.booking-confirmed__details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  text-align: left;
+  margin-bottom: 40px;
+  padding: 24px;
+  border: 1px solid rgba(26, 26, 24, 0.1);
+  border-radius: 4px;
+}
+
+.booking-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.booking-detail__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cork);
+}
+
+.booking-detail__value {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink);
+}
+
+/* ── Booking Loading ── */
+.booking-loading {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--cork);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+}
+
+.booking-loading__spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(26, 26, 24, 0.1);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Booking Error ── */
+.booking-error {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--cork);
+  font-family: var(--serif);
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* ── Parchment section variants for booking components ── */
+.section--parchment .time-slot {
+  color: var(--ink);
+  border-color: rgba(26, 26, 24, 0.12);
+}
+
+.section--parchment .time-slot:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.section--parchment .time-slot--selected {
+  border-color: var(--ink);
+  background: rgba(26, 26, 24, 0.08);
+}
+
+.section--parchment .form-field__input {
+  color: var(--ink);
+  border-color: rgba(26, 26, 24, 0.15);
+}
+
+.section--parchment .form-field__input:focus {
+  border-color: var(--ink);
+}
+
+.section--parchment .form-field__input::placeholder {
+  color: var(--cork);
+}
+
 
 /* ══════════════════════════════════════════════════════════
    Events Page — Featured Event & Section Label
