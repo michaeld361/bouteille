@@ -1712,6 +1712,45 @@ a.detail-block__value:hover {
   color: var(--cork);
 }
 
+/* ── Parchment: detail blocks, buttons, links ── */
+.section--parchment .detail-block__label {
+  color: var(--cork);
+}
+
+.section--parchment .detail-block__value,
+.section--parchment .detail-block__value a,
+.section--parchment a.detail-block__value {
+  color: var(--ink);
+}
+
+.section--parchment .detail-block__value a:hover,
+.section--parchment a.detail-block__value:hover {
+  color: var(--cork);
+}
+
+.section--parchment .btn {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.section--parchment .btn::before {
+  background: var(--ink);
+}
+
+.section--parchment .btn:hover {
+  color: var(--parchment, #f5f0e8);
+  border-color: var(--ink);
+}
+
+.section--parchment .btn--outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: rgba(26, 26, 24, 0.2);
+}
+
+.section--parchment .btn--outline:hover {
+  border-color: var(--ink);
+}
 
 /* ══════════════════════════════════════════════════════════
    Events Page — Featured Event & Section Label

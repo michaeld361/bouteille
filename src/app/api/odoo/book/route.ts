@@ -95,14 +95,14 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Create the calendar event (reservation)
+    // Create the calendar event with inline booking line
+    // NOTE: Do NOT pass appointment_resource_ids — Odoo auto-links from booking_line_ids
     const eventId = await create('calendar.event', {
       name: `Réservation – ${name}`,
       start: startDatetime,
       stop: stopDatetime,
       appointment_type_id: APPOINTMENT_TYPE_ID,
-      partner_ids: [[4, partnerId]], // Link partner
-      appointment_resource_ids: [[4, freeTable.id]], // Assign table
+      partner_ids: [[4, partnerId]],
       phone_number: phone,
       description: dietary ? `Dietary: ${dietary}` : '',
       booking_line_ids: [[0, 0, {
@@ -110,8 +110,6 @@ export async function POST(req: NextRequest) {
         appointment_resource_id: freeTable.id,
         capacity_reserved: guests,
         capacity_used: guests,
-        event_start: startDatetime,
-        event_stop: stopDatetime,
       }]],
     })
 
