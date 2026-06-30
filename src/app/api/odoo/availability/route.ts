@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'guests must be between 1 and 10' }, { status: 400 })
     }
 
-    // Get all resources (tables) that can fit this party size
+    // Get all resources (tables)
     const tables = await searchRead<{
       id: number
       name: string
@@ -45,9 +45,6 @@ export async function GET(req: NextRequest) {
       ['appointment_type_ids', 'in', [APPOINTMENT_TYPE_ID]],
       ['active', '=', true],
     ], ['name', 'capacity'])
-
-    // Tables that can fit the party (for parties > 2, we might need to combine tables later)
-    const suitableTables = tables.filter(t => t.capacity >= guests)
 
     // Get all bookings for this date
     const dayStart = `${dateStr} 00:00:00`
@@ -59,41 +56,41 @@ export async function GET(req: NextRequest) {
       ['event_start', '<=', dayEnd],
     ], ['appointment_resource_id', 'capacity_reserved', 'event_start', 'event_stop'])
 
-    // Define time slots (17:00 - 21:30, every 30 min, matching opening hours)
+    // Define time slots (17:00 - 21:00, every 30 min)
     const timeSlots = []
     for (let hour = 17; hour <= 21; hour++) {
       for (const min of [0, 30]) {
-        if (hour === 21 && min > 0) continue // Last slot is 21:00
+        if (hour === 21 && min > 0) continue
         timeSlots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`)
       }
     }
 
-    // For each time slot, check how many suitable tables are free
+    // For each time slot, check total free capacity (combining tables)
     const availability = timeSlots.map(time => {
       const slotStart = `${dateStr} ${time}:00`
-      const slotEndHour = parseInt(time.split(':')[0]) + 2 // 2-hour duration
+      const slotEndHour = parseInt(time.split(':')[0]) + 2
       const slotEndMin = time.split(':')[1]
       const slotEnd = `${dateStr} ${slotEndHour.toString().padStart(2, '0')}:${slotEndMin}:00`
 
-      // Find which tables are booked during this time slot (check overlap)
+      // Find which tables are booked during this time slot
       const bookedTableIds = new Set(
         bookingLines
           .filter(bl => {
             const bookStart = bl.event_start
             const bookEnd = bl.event_stop
-            // Overlap: starts before slot ends AND ends after slot starts
             return bookStart < slotEnd && bookEnd > slotStart
           })
           .map(bl => bl.appointment_resource_id[0])
       )
 
-      // Count available suitable tables
-      const freeTables = suitableTables.filter(t => !bookedTableIds.has(t.id))
+      // Sum capacity of all free tables — larger parties use multiple tables
+      const freeTables = tables.filter(t => !bookedTableIds.has(t.id))
+      const freeCapacity = freeTables.reduce((sum, t) => sum + t.capacity, 0)
 
       return {
         time,
-        available: freeTables.length > 0,
-        remaining: freeTables.length,
+        available: freeCapacity >= guests,
+        remaining: freeCapacity,
       }
     })
 

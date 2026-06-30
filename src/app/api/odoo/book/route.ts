@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     const endHour = parseInt(hourStr) + 2 // 2-hour reservation
     const stopDatetime = `${date} ${endHour.toString().padStart(2, '0')}:${minStr}:00`
 
-    // Find a suitable free table
+    // Find free tables — get ALL tables, not just those >= party size
     const tables = await searchRead<{
       id: number
       name: string
@@ -55,10 +55,9 @@ export async function POST(req: NextRequest) {
     }>('appointment.resource', [
       ['appointment_type_ids', 'in', [APPOINTMENT_TYPE_ID]],
       ['active', '=', true],
-      ['capacity', '>=', guests],
-    ], ['name', 'capacity'], { order: 'capacity asc' }) // Smallest suitable table first
+    ], ['name', 'capacity'], { order: 'capacity desc' }) // Largest tables first for efficiency
 
-    // Check which tables are booked
+    // Check which tables are booked for this time
     const bookingLines = await searchRead<{
       appointment_resource_id: [number, string]
       event_start: string
@@ -70,9 +69,18 @@ export async function POST(req: NextRequest) {
     ], ['appointment_resource_id', 'event_start', 'event_stop'])
 
     const bookedTableIds = new Set(bookingLines.map(bl => bl.appointment_resource_id[0]))
-    const freeTable = tables.find(t => !bookedTableIds.has(t.id))
+    const freeTables = tables.filter(t => !bookedTableIds.has(t.id))
 
-    if (!freeTable) {
+    // Allocate enough tables to cover the party size (greedy: largest first)
+    const allocatedTables: typeof freeTables = []
+    let remainingGuests = guests
+    for (const table of freeTables) {
+      if (remainingGuests <= 0) break
+      allocatedTables.push(table)
+      remainingGuests -= table.capacity
+    }
+
+    if (remainingGuests > 0) {
       return NextResponse.json(
         { error: 'No tables available for this time slot. Please try another time.' },
         { status: 409 }
@@ -95,7 +103,15 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Create the calendar event with inline booking line
+    // Create booking lines — one per allocated table
+    const bookingLineCommands = allocatedTables.map(table => [0, 0, {
+      appointment_type_id: APPOINTMENT_TYPE_ID,
+      appointment_resource_id: table.id,
+      capacity_reserved: Math.min(table.capacity, guests),
+      capacity_used: Math.min(table.capacity, guests),
+    }])
+
+    // Create the calendar event with inline booking lines
     // NOTE: Do NOT pass appointment_resource_ids — Odoo auto-links from booking_line_ids
     const eventId = await create('calendar.event', {
       name: `Réservation – ${name}`,
@@ -105,12 +121,7 @@ export async function POST(req: NextRequest) {
       partner_ids: [[4, partnerId]],
       phone_number: phone,
       description: dietary ? `Dietary: ${dietary}` : '',
-      booking_line_ids: [[0, 0, {
-        appointment_type_id: APPOINTMENT_TYPE_ID,
-        appointment_resource_id: freeTable.id,
-        capacity_reserved: guests,
-        capacity_used: guests,
-      }]],
+      booking_line_ids: bookingLineCommands,
     })
 
     // If there's a dietary question, save the answer
@@ -118,23 +129,23 @@ export async function POST(req: NextRequest) {
       try {
         await create('appointment.answer.input', {
           appointment_type_id: APPOINTMENT_TYPE_ID,
-          question_id: 2, // "Dietary preferences" question
+          question_id: 2,
           calendar_event_id: eventId,
           value_text_box: dietary,
         })
       } catch {
-        // Non-critical, continue
         console.warn('[Odoo] Failed to save dietary answer')
       }
     }
 
+    const tableNames = allocatedTables.map(t => t.name).join(' + ')
     return NextResponse.json({
       success: true,
       bookingId: eventId,
-      table: freeTable.name,
+      table: tableNames,
       datetime: startDatetime,
       guests,
-      message: `Reservation confirmed for ${name} on ${date} at ${time} (${guests} guests, ${freeTable.name}).`,
+      message: `Reservation confirmed for ${name} on ${date} at ${time} (${guests} guests, ${tableNames}).`,
     })
   } catch (error) {
     console.error('[Odoo Book]', error)
