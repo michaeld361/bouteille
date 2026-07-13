@@ -292,7 +292,7 @@ export default function BookingForm({ lang }: { lang: Lang }) {
             required
             className="form-field__input"
           >
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((n) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
               <option key={n} value={n}>
                 {n} {n === 1 ? t.guest : t.guestsLabel}
               </option>
