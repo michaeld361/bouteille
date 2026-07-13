@@ -16,6 +16,22 @@ interface BookingLine {
   event_stop: string
 }
 
+function getBrusselsOffset(dateStr: string): number {
+  const dt = new Date(`${dateStr}T12:00:00Z`)
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Brussels', hour12: false, timeZoneName: 'shortOffset' }).formatToParts(dt)
+  const tzPart = parts.find(p => p.type === 'timeZoneName')?.value
+  if (tzPart && tzPart.includes('+')) {
+    return parseInt(tzPart.split('+')[1].split(':')[0], 10)
+  }
+  return 1
+}
+
+function brusselsToUTCString(dateStr: string, timeStr: string): string {
+  const offset = getBrusselsOffset(dateStr)
+  const dt = new Date(`${dateStr}T${timeStr}:00.000+0${offset}:00`)
+  return dt.toISOString().replace('T', ' ').substring(0, 19)
+}
+
 /**
  * GET /api/odoo/availability?date=2026-06-25&guests=2
  * 
@@ -67,10 +83,9 @@ export async function GET(req: NextRequest) {
 
     // For each time slot, check total free capacity (combining tables)
     const availability = timeSlots.map(time => {
-      const slotStart = `${dateStr} ${time}:00`
-      const slotEndHour = parseInt(time.split(':')[0]) + 2
-      const slotEndMin = time.split(':')[1]
-      const slotEnd = `${dateStr} ${slotEndHour.toString().padStart(2, '0')}:${slotEndMin}:00`
+      const endTimeStr = `${(parseInt(time.split(':')[0]) + 2).toString().padStart(2, '0')}:${time.split(':')[1]}`
+      const slotStartUtc = brusselsToUTCString(dateStr, time)
+      const slotEndUtc = brusselsToUTCString(dateStr, endTimeStr)
 
       // Find which tables are booked during this time slot
       const bookedTableIds = new Set(
@@ -78,7 +93,7 @@ export async function GET(req: NextRequest) {
           .filter(bl => {
             const bookStart = bl.event_start
             const bookEnd = bl.event_stop
-            return bookStart < slotEnd && bookEnd > slotStart
+            return bookStart < slotEndUtc && bookEnd > slotStartUtc
           })
           .map(bl => bl.appointment_resource_id[0])
       )

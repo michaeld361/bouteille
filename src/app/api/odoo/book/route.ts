@@ -18,6 +18,22 @@ interface BookingRequest {
   notes?: string
 }
 
+function getBrusselsOffset(dateStr: string): number {
+  const dt = new Date(`${dateStr}T12:00:00Z`)
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Brussels', hour12: false, timeZoneName: 'shortOffset' }).formatToParts(dt)
+  const tzPart = parts.find(p => p.type === 'timeZoneName')?.value
+  if (tzPart && tzPart.includes('+')) {
+    return parseInt(tzPart.split('+')[1].split(':')[0], 10)
+  }
+  return 1
+}
+
+function brusselsToUTCString(dateStr: string, timeStr: string): string {
+  const offset = getBrusselsOffset(dateStr)
+  const dt = new Date(`${dateStr}T${timeStr}:00.000+0${offset}:00`)
+  return dt.toISOString().replace('T', ' ').substring(0, 19)
+}
+
 /**
  * POST /api/odoo/book
  * 
@@ -41,11 +57,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Party size must be between 1 and 10' }, { status: 400 })
     }
 
-    // Calculate start/stop datetime
-    const startDatetime = `${date} ${time}:00`
+    // Calculate start/stop datetime in UTC
     const [hourStr, minStr] = time.split(':')
     const endHour = parseInt(hourStr) + 2 // 2-hour reservation
-    const stopDatetime = `${date} ${endHour.toString().padStart(2, '0')}:${minStr}:00`
+    const endTimeStr = `${endHour.toString().padStart(2, '0')}:${minStr}`
+    
+    const startDatetimeUtc = brusselsToUTCString(date, time)
+    const stopDatetimeUtc = brusselsToUTCString(date, endTimeStr)
 
     // Find free tables — get ALL tables, not just those >= party size
     const tables = await searchRead<{
@@ -64,8 +82,8 @@ export async function POST(req: NextRequest) {
       event_stop: string
     }>('appointment.booking.line', [
       ['appointment_type_id', '=', APPOINTMENT_TYPE_ID],
-      ['event_start', '<', stopDatetime],
-      ['event_stop', '>', startDatetime],
+      ['event_start', '<', stopDatetimeUtc],
+      ['event_stop', '>', startDatetimeUtc],
     ], ['appointment_resource_id', 'event_start', 'event_stop'])
 
     const bookedTableIds = new Set(bookingLines.map(bl => bl.appointment_resource_id[0]))
@@ -115,8 +133,8 @@ export async function POST(req: NextRequest) {
     // NOTE: Do NOT pass appointment_resource_ids — Odoo auto-links from booking_line_ids
     const eventId = await create('calendar.event', {
       name: `Réservation – ${name}`,
-      start: startDatetime,
-      stop: stopDatetime,
+      start: startDatetimeUtc,
+      stop: stopDatetimeUtc,
       appointment_type_id: APPOINTMENT_TYPE_ID,
       partner_ids: [[4, partnerId]],
       phone_number: phone,
@@ -143,7 +161,7 @@ export async function POST(req: NextRequest) {
       success: true,
       bookingId: eventId,
       table: tableNames,
-      datetime: startDatetime,
+      datetime: startDatetimeUtc,
       guests,
       message: `Reservation confirmed for ${name} on ${date} at ${time} (${guests} guests, ${tableNames}).`,
     })
