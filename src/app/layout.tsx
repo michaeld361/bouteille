@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, Outfit, JetBrains_Mono, Josefin_Sans } from 'next/font/google'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import './globals.css'
-
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '600'],
@@ -58,6 +58,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>{children}</body>
+      {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
     </html>
   )
 }
