@@ -33,7 +33,20 @@ export const siteSettings = defineType({
     defineField({ name: 'googleMapsUrl', title: 'Google Maps Directions URL', type: 'url', group: 'contact' }),
     defineField({ name: 'googleMapsEmbedUrl', title: 'Google Maps Embed URL', type: 'url', group: 'contact', description: 'URL for the embedded map iframe' }),
     defineField({ name: 'openingHours', title: 'Opening Hours', type: 'internationalizedArrayString', group: 'contact' }),
-    defineField({ name: 'marqueeItems', title: 'Marquee Ticker Items', type: 'array', group: 'content', of: [{ type: 'internationalizedArrayString' }], description: 'Phrases that scroll across the ticker' }),
+    defineField({ 
+      name: 'marqueeItems', 
+      title: 'Marquee Ticker Items', 
+      type: 'array', 
+      group: 'content', 
+      of: [
+        { 
+          type: 'object',
+          name: 'marqueeItem',
+          fields: [{ name: 'text', type: 'internationalizedArrayString' }] 
+        }
+      ], 
+      description: 'Phrases that scroll across the ticker' 
+    }),
     defineField({ name: 'copyright', title: 'Copyright Text', type: 'string', group: 'content' }),
     defineField({ name: 'allergenNotice', title: 'Allergen Notice', type: 'internationalizedArrayText', group: 'content' }),
     defineField({

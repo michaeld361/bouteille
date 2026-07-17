@@ -3,14 +3,14 @@
 import { createTranslator, type Language } from '@/lib/i18n'
 
 interface MarqueeProps {
-  items?: Array<Array<{ _key: string; value: string }>>
+  items?: Array<{ text: Array<{ _key: string; value: string }> }>
   lang: Language
 }
 
 export default function Marquee({ items, lang }: MarqueeProps) {
   const t = createTranslator(lang)
   const displayItems = items && items.length > 0
-    ? items.map((item) => t(item))
+    ? items.map((item) => t(item.text))
     : ['European wines', 'Seasonal food', 'The art of sharing', 'Stockel, Brussels']
   const allItems = [...displayItems, ...displayItems]
 
