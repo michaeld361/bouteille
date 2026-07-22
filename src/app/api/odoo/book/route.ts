@@ -3,9 +3,17 @@
    ══════════════════════════════════════════════════════════ */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { execute, searchRead, create } from '@/lib/odoo'
-
-const APPOINTMENT_TYPE_ID = 1
+import { searchRead, create } from '@/lib/odoo'
+import {
+  APPOINTMENT_TYPE_ID,
+  RESERVATION_HOURS,
+  brusselsToUTCString,
+  fetchActiveTables,
+  fetchLeavesForDay,
+  fetchRecurringSlots,
+  getScheduleForDate,
+  tablesAvailableForSlot,
+} from '@/lib/odoo-booking'
 
 interface BookingRequest {
   date: string       // YYYY-MM-DD
@@ -18,27 +26,12 @@ interface BookingRequest {
   notes?: string
 }
 
-function getBrusselsOffset(dateStr: string): number {
-  const dt = new Date(`${dateStr}T12:00:00Z`)
-  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Brussels', hour12: false, timeZoneName: 'shortOffset' }).formatToParts(dt)
-  const tzPart = parts.find(p => p.type === 'timeZoneName')?.value
-  if (tzPart && tzPart.includes('+')) {
-    return parseInt(tzPart.split('+')[1].split(':')[0], 10)
-  }
-  return 1
-}
-
-function brusselsToUTCString(dateStr: string, timeStr: string): string {
-  const offset = getBrusselsOffset(dateStr)
-  const dt = new Date(`${dateStr}T${timeStr}:00.000+0${offset}:00`)
-  return dt.toISOString().replace('T', ' ').substring(0, 19)
-}
-
 /**
  * POST /api/odoo/book
- * 
+ *
  * Creates a reservation in Odoo via the calendar.event model
  * with appointment booking lines for resource management.
+ * Rejects bookings on closed days (Odoo jours de fermeture).
  */
 export async function POST(req: NextRequest) {
   try {
@@ -57,23 +50,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Party size must be between 1 and 10' }, { status: 400 })
     }
 
+    const [tables, recurringSlots, leaves] = await Promise.all([
+      fetchActiveTables(),
+      fetchRecurringSlots(),
+      fetchLeavesForDay(date),
+    ])
+
+    const schedule = getScheduleForDate(date, recurringSlots, tables, leaves)
+    if (!schedule.isOpen) {
+      return NextResponse.json(
+        { error: schedule.message || 'The wine bar is closed on this day.' },
+        { status: 409 },
+      )
+    }
+
+    if (!schedule.timeSlots.includes(time)) {
+      return NextResponse.json(
+        { error: 'Selected time is outside opening hours. Please choose another time.' },
+        { status: 409 },
+      )
+    }
+
     // Calculate start/stop datetime in UTC
     const [hourStr, minStr] = time.split(':')
-    const endHour = parseInt(hourStr) + 2 // 2-hour reservation
+    const endHour = parseInt(hourStr, 10) + RESERVATION_HOURS
     const endTimeStr = `${endHour.toString().padStart(2, '0')}:${minStr}`
-    
+
     const startDatetimeUtc = brusselsToUTCString(date, time)
     const stopDatetimeUtc = brusselsToUTCString(date, endTimeStr)
-
-    // Find free tables — get ALL tables, not just those >= party size
-    const tables = await searchRead<{
-      id: number
-      name: string
-      capacity: number
-    }>('appointment.resource', [
-      ['appointment_type_ids', 'in', [APPOINTMENT_TYPE_ID]],
-      ['active', '=', true],
-    ], ['name', 'capacity'], { order: 'capacity desc' }) // Largest tables first for efficiency
 
     // Check which tables are booked for this time
     const bookingLines = await searchRead<{
@@ -87,7 +91,13 @@ export async function POST(req: NextRequest) {
     ], ['appointment_resource_id', 'event_start', 'event_stop'])
 
     const bookedTableIds = new Set(bookingLines.map(bl => bl.appointment_resource_id[0]))
-    const freeTables = tables.filter(t => !bookedTableIds.has(t.id))
+    const freeTables = tablesAvailableForSlot(
+      tables,
+      leaves,
+      bookedTableIds,
+      startDatetimeUtc,
+      stopDatetimeUtc,
+    ).sort((a, b) => b.capacity - a.capacity) // Largest first
 
     // Allocate enough tables to cover the party size (greedy: largest first)
     const allocatedTables: typeof freeTables = []
